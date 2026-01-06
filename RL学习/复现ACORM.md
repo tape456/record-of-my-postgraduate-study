@@ -359,11 +359,76 @@ iii) 在t=36时刻即将取得胜利时，核心策略是让海军陆战队{2,3,
 
 ## 实现步骤
 
+网络速率问题，利用autodl自带的学术资源加速指令（解决git不下来的问题）：
 
+可以开学术加速功能，文档里有，命令source /etc/network_turbo
 
+```
 git clone https://github.com/NJU-RL/ACORM.git
+```
+
+```
+conda create -n acorm python=3.9.16 -y
+conda activate acorm
+pip install -r requirements.txt
+```
+
+
 
 ```
 export SC2PATH=/root/autodl-tmp/ACORM/StarCraftII
 ```
+
+
+
+
+
+### certifi报错
+
+![image-20260106164450920](复现ACORM-img/image-20260106164450920.png)
+
+### sklearn报错
+
+✅正确解决办法（推荐）
+
+`requirements.txt` 里第 79 行现在是类似：
+
+```
+sklearn==0.0.post1
+```
+
+把它改成：
+
+```
+scikit-learn
+```
+
+（如果你想固定版本也可以：`scikit-learn==1.3.2` 之类）
+
+然后重新安装：
+
+```
+python -m pip install -U pip setuptools wheel
+pip install -r requirements.txt
+```
+
+> 注意：即使包名换成 `scikit-learn`，代码里 `import sklearn` **仍然是对的**，不用改代码。
+
+
+
+### SMAC多智能体环境压缩包解压
+
+SC2.4.10的解压密码是：iagreetotheeula
+
+
+
+
+
+
+
+
+
+
+
+
 

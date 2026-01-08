@@ -357,7 +357,7 @@ iii) 在t=36时刻即将取得胜利时，核心策略是让海军陆战队{2,3,
 
 
 
-## 实现步骤
+## 实现步骤(踩坑过程)
 
 网络速率问题，利用autodl自带的学术资源加速指令（解决git不下来的问题）：
 
@@ -380,6 +380,54 @@ export SC2PATH=/root/autodl-tmp/ACORM/StarCraftII
 ```
 
 
+
+### 远程服务器网络报错问题（顺便把防火墙关了）
+
+灵感来源CSDN：
+
+```
+https://blog.csdn.net/qq_45689158/article/details/145057798?fromshare=blogdetail&sharetype=blogdetail&sharerId=145057798&sharerefer=PC&sharesource=qq_57945409&sharefrom=from_link
+```
+
+和另一篇CSDN：
+
+```
+https://blog.csdn.net/weixin_44576482/article/details/128667675?fromshare=blogdetail&sharetype=blogdetail&sharerId=128667675&sharerefer=PC&sharesource=qq_57945409&sharefrom=from_link
+```
+
+要先按照第二篇的CSDN用CLASH的LAN，端口默认7890
+
+![image-20260107210453746](复现ACORM-img/image-20260107210453746.png)
+
+![image-20260107210509664](复现ACORM-img/image-20260107210509664.png)
+
+
+
+![image-20260107210523559](复现ACORM-img/image-20260107210523559.png)
+
+远程服务器使用本机的代理进行转发，从而可以访问外网
+
+具体步骤如下：
+
+1.打开你电脑的windows powershell输入：
+
+1️⃣ 本地（开隧道）
+
+```
+ssh -p 13035 -R 7890:127.0.0.1:7890 litong@9.tcp.vip.cpolar.cn
+```
+
+2️⃣ 服务器（测试 HTTP）
+
+```
+curl https://www.google.com
+```
+
+✔ 成功 = 一切 OK
+
+
+
+`到这里基本上就能够pip requirements.txt文件里的github的地址了`
 
 
 
@@ -416,19 +464,98 @@ pip install -r requirements.txt
 
 
 
+
+
+### tensorboardX报错
+
+如果项目允许，可以升级 tensorboardX 到与 3.19.5 兼容的版本：
+
+```
+# 查看有哪些 tensorboardX 版本与 3.19.5 兼容
+pip install tensorboardX==2.5.0
+```
+
+
+
+
+
 ### SMAC多智能体环境压缩包解压
 
-SC2.4.10的解压密码是：iagreetotheeula
+SC2.4.10的解压密码是：
+
+```
+iagreetotheeula
+```
 
 
 
 
 
+### 给执行权限
+
+```
+chmod +x /root/StarCraftII/Versions/Base75689/SC2_x64
+```
+
+```
+chmod +x /home/litong/StarCraftII/Versions/Base75689/SC2_x64
+```
 
 
 
+如果 SC2PATH 未设置或设置错误
+
+```
+export SC2PATH="/home/litong/StarCraftII"
+
+echo 'export SC2PATH="/home/litong/StarCraftII"' >> ~/.bashrc
+
+source
+```
 
 
+
+### 找不到地图问题
+
+报错截图：
+
+![image-20260107182350324](复现ACORM-img/image-20260107182350324.png)
+
+他这个因为前面linux版本的SMAC的包里地图并没有这个地图，询问ai之后，提供了下面的网址：
+
+
+
+```
+https://github.com/oxwhirl/smac/tree/master
+```
+
+这个网址里
+
+![image-20260107182226318](复现ACORM-img/image-20260107182226318.png)
+
+
+
+## 结果效果
+
+执行以下命令，基于QMIX运行ACORM，并配置地图，例如：`MMM2`
+
+跑了一个训练三十万步数的结果
+
+```
+python ./ACORM_QMIX/main.py --algorithm ACORM --env_name MMM2 --cluster_num 3 --max_train_steps 305000
+```
+
+![image-20260107212025080](复现ACORM-img/image-20260107212025080.png)
+
+绘制基于QMIX运行ACORM的实验的可视化曲线图：
+
+```
+python plot.py --algorithm 'ACORM_QMIX'
+```
+
+![image-20260107211828515](复现ACORM-img/image-20260107211828515.png)
+
+![image-20260107214105071](复现ACORM-img/image-20260107214105071.png)
 
 
 

@@ -477,8 +477,6 @@ pip install tensorboardX==2.5.0
 
 
 
-
-
 ### SMAC多智能体环境压缩包解压
 
 SC2.4.10的解压密码是：
@@ -486,8 +484,6 @@ SC2.4.10的解压密码是：
 ```
 iagreetotheeula
 ```
-
-
 
 
 

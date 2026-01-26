@@ -361,9 +361,13 @@ iii) 在t=36时刻即将取得胜利时，核心策略是让海军陆战队{2,3,
 
 网络速率问题，利用autodl自带的学术资源加速指令（解决git不下来的问题）：
 
-可以开学术加速功能，文档里有，命令source /etc/network_turbo
+可以开学术加速功能，文档里有，命令
 
+```bash
+source /etc/network_turbo
 ```
+
+```bash
 git clone https://github.com/NJU-RL/ACORM.git
 ```
 
@@ -377,6 +381,10 @@ pip install -r requirements.txt
 
 ```
 export SC2PATH=/root/autodl-tmp/ACORM/StarCraftII
+```
+
+```bash
+python ./ACORM_QMIX/main.py --algorithm ACORM --env_name MMM2 --cluster_num 3 --max_train_steps 3050000
 ```
 
 
@@ -531,6 +539,208 @@ https://github.com/oxwhirl/smac/tree/master
 
 
 
+### requirements文件中涉及到git的指令
+
+因为服务器访问外网有限制，也就是下面这一行命令不能执行：
+
+```python
+SMAC @ git+https://github.com/oxwhirl/smac.git@8a092e4bd0c6f5d3cf929523c67e1bca861463aa
+```
+
+所以这里需要用自己电脑去github上拉下来
+
+```
+pip install git+https://github.com/oxwhirl/smac.git
+```
+
+**使用离线安装**
+
+在能访问 GitHub 的机器上下载所需仓库，然后上传到服务器：
+
+```
+# 在本地机器上
+git clone https://github.com/oxwhirl/smac.git
+tar -czf smac.tar.gz smac
+
+# 上传到服务器后
+tar -xzf smac.tar.gz
+cd smac
+pip install -e .
+```
+
+
+
+
+
+
+
+
+
+### 远程服务器的压缩包解压使用问题
+
+![image-20260120142429710](复现ACORM-img/image-20260120142429710.png)
+
+手动启动 SC2 时出现：
+
+```
+Error unique: 'NGDP_NOT_AVAILABLE'
+Error failure: 'e_errorIsStreaming'
+Fatal error encountered!
+```
+
+这是 **SC2 在 Linux 服务器上最常见的致命错误之一**。
+
+一句话：
+
+> **你的 SC2 安装不完整 / 数据目录缺失 / 版本不匹配**
+
+虽然你现在有：
+
+```
+StarCraftII/
+ ├── Versions/Base75689/SC2_x64
+```
+
+但 **缺少 NGDP（Battle.net 数据包）支持文件**
+
+SC2 会认为：
+
+> 我被要求从 Battle.net streaming 数据，但服务器上根本没有
+
+于是直接 core dump 💥
+
+你现在的 SC2 目录是这种结构：
+
+```
+StarCraftII/
+ ├── Versions/
+ ├── Battle.net/
+ ├── Interfaces/
+```
+
+这通常是因为：
+
+- ❌ 从别人的环境里拷贝了目录
+- ❌ 只下载了 Interfaces
+- ❌ 解压不完整
+- ❌ 用了错误的 SC2 zip
+- ❌ 从 Windows 拷过来
+
+👉 **SC2 在 Linux 服务器上必须用官方 Linux 包完整解压**
+
+#### ✅ 方法一（强烈推荐，最稳）：重新下载官方 Linux 版 SC2
+
+#### 1️⃣ 删除你现在这个残缺版本（否则会继续报错）
+
+```
+rm -rf ~/StarCraftII
+```
+
+------
+
+#### 2️⃣ 下载官方完整包（SMAC 用这个版本最稳）
+
+```
+cd ~
+wget http://blzdistsc2-a.akamaihd.net/Linux/SC2.4.10.zip
+unzip SC2.4.10.zip
+```
+
+解压后**必须是这种结构**：
+
+```
+StarCraftII/
+ ├── Battle.net
+ ├── Interfaces
+ ├── Versions
+ │    └── Base75689
+ │         └── SC2_x64
+```
+
+------
+
+#### 3️⃣ 设置环境变量（非常关键）
+
+```
+export SC2PATH=~/StarCraftII
+echo 'export SC2PATH=~/StarCraftII' >> ~/.bashrc
+source ~/.bashrc
+```
+
+------
+
+#### 4️⃣ 给权限
+
+```
+chmod -R +x ~/StarCraftII
+```
+
+------
+
+#### 5️⃣ 测试（这一步一定要成功）
+
+```
+cd ~/StarCraftII/Versions/Base75689
+./SC2_x64 -listen 127.0.0.1 -port 5000
+```
+
+如果看到：
+
+```
+Startup Phase 1 complete
+Starting up...
+```
+
+并且**不再 core dump**
+ 👉 说明问题解决了
+
+为什么你的 SC2 会 core dump？
+
+因为现在这个目录里：
+
+```
+NGDP 数据缺失
+```
+
+SC2 以为自己要联网拉数据（streaming），
+但服务器 **没 Battle.net、没图形、没数据包**，
+于是直接崩。
+
+#### 你现在可以这样做（最稳流程）
+
+```
+rm -rf ~/StarCraftII
+wget http://blzdistsc2-a.akamaihd.net/Linux/SC2.4.10.zip
+unzip SC2.4.10.zip
+export SC2PATH=~/StarCraftII
+chmod -R +x ~/StarCraftII
+cd ~/StarCraftII/Versions/Base*
+./SC2_x64 -listen 127.0.0.1 -port 5000
+```
+
+
+
+
+
+### 安装多智能体强化学习平台
+
+参考教程CSDN：
+
+```
+[window10安装多智能体强化学习平台（SMAC）_conda如何安装smac库-CSDN博客](https://blog.csdn.net/Duke_yuan/article/details/121234042)
+```
+
+下载到本地再安装
+
+```
+git clone https://github.com/oxwhirl/smac.git
+pip install -e smac/
+```
+
+
+
+
+
 ## 结果效果
 
 执行以下命令，基于QMIX运行ACORM，并配置地图，例如：`MMM2`
@@ -555,3 +765,101 @@ python plot.py --algorithm 'ACORM_QMIX'
 
 
 
+## 本地服务器结果
+
+跑起来之后报错：
+
+```python
+ValueError: Input contains NaN, infinity or a value too large for dtype('float64').
+```
+
+说明：
+
+- ✅ SC2 正常跑了
+
+- ✅ 训练跑了一段时间
+
+- ❌ 在更新 ACORM 的 cluster（角色聚类）时崩了
+
+  也就是算法数值稳定性问题，不是环境问题
+
+  ACORM 的角色嵌入是：
+
+  ```
+  agent_embedding = self.agent_embedding[idx]
+  KMeans(n_clusters=self.cluster_num).fit(agent_embedding)
+  ```
+
+  但在训练早期 / reward 爆炸 / 梯度异常时，会出现：
+
+  ```
+  agent_embedding = NaN
+  ```
+
+  然后 sklearn 直接炸。
+
+  **论文代码本身就不稳定**（很多人复现都会遇到）
+
+
+
+截图里的代码是：
+
+```
+agent_embedding = agent_embedding.reshape(batch_o.shape[0], self.N, -1).to('cpu')
+```
+
+下面紧跟着就是：
+
+```
+for idx in range(agent_embedding.shape[0]):
+    if batch_active[idx, t] > 0.5:
+        if t % self.multi_steps == 0:
+            clusters_labels = KMeans(n_clusters=self.cluster_num)\
+                .fit(agent_embedding[idx]).labels_
+```
+
+也就是说：
+
+> **KMeans.fit(agent_embedding[idx]) 的输入就是这里产生的 agent_embedding**
+
+而 NaN / inf **一定是在 reshape 后产生的**，所以你要在这一行下面加保护。
+
+修改了一下代码：
+
+ 你现在这行：
+
+```python
+agent_embedding = agent_embedding.reshape(batch_o.shape[0], self.N, -1).to('cpu')
+```
+
+🔧 改成（这是最关键的修复）：
+
+```python
+agent_embedding = agent_embedding.reshape(batch_o.shape[0], self.N, -1).to('cpu')
+
+agent_embedding = torch.nan_to_num(
+    agent_embedding, nan=0.0, posinf=1.0, neginf=-1.0
+)
+```
+
+最终结构应当是：
+
+```py
+agent_embedding = agent_embedding.reshape(batch_o.shape[0], self.N, -1).to('cpu')
+agent_embedding = torch.nan_to_num(agent_embedding, nan=0.0, posinf=1.0, neginf=-1.0)
+
+if not torch.isfinite(agent_embedding).all():
+    print("[Warning] NaN in agent_embedding, skip clustering")
+    return
+
+for idx in range(agent_embedding.shape[0]):
+    ...
+```
+
+
+
+
+
+跑到后面成功率为0，奖励也为0
+
+![image-20260121200705431](复现ACORM-img/image-20260121200705431.png)

@@ -863,3 +863,22 @@ for idx in range(agent_embedding.shape[0]):
 跑到后面成功率为0，奖励也为0
 
 ![image-20260121200705431](复现ACORM-img/image-20260121200705431.png)
+
+
+
+
+
+## 换easy任务
+
+```bash
+python ./ACORM_QMIX/main.py --algorithm ACORM --env_name 3m --cluster_num 3 --max_train_steps 300000
+```
+
+./memory_monitor.sh
+
+
+
+
+
+
+

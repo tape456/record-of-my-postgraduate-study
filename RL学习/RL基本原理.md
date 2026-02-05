@@ -804,8 +804,6 @@ Q-learning 算法的具体流程如下：
 
 需要强调的是，Q-learning 的更新并非必须使用当前贪心策略![image-20260202162927642](RL基本原理-img/image-20260202162927642.png)采样得到的数据，因为给定任意![image-20260202162946686](RL基本原理-img/image-20260202162946686.png)都可以直接根据更新公式来更新，为了探索，我们通常使用一个-贪婪策略来与环境交互。
 
-
-
 #### 在线策略算法与离线策略算法
 
 我们称采样数据的策略为**行为策略**（behavior policy），称用这些数据来更新的策略为**目标策略**（target policy）。在线策略（on-policy）算法表示行为策略和目标策略是同一个策略；而离线策略（off-policy）算法表示行为策略和目标策略不是同一个策略。
@@ -828,19 +826,16 @@ Sarsa 是典型的在线策略算法，而 Q-learning 是典型的离线策略�
 
 3. **再真实选下一步**：在马路中间，你又用 ε- 贪心选了 “继续小步走”（新动作`a'`）。
 
-4. 更新经验
-
-   ：你会用这一整套真实经历（
+4. 更新经验：你会用这一整套真实经历（
 
    ```
    s,a,r,s',a'
    ```
-
+   
    五元组）来更新 “马路边 - 小步走” 的价值。
 
    - 你的经验是：“我在马路边选了小步走，到了中间，然后又选了继续走，所以这个动作的价值是`r + γ*Q(s',a')`”。
    - 你只相信自己真实走过的每一步，不参考任何 “想象中的最优走法”。
-
    
 
 所以 Sarsa 是**在线算法**：它的更新依赖 “自己真实走出来的五元组”，每一步都是你实际执行的动作，非常保守、安全。
@@ -857,24 +852,19 @@ Sarsa 是典型的在线策略算法，而 Q-learning 是典型的离线策略�
 
 3. **想象最优走法**：你不关心下一步自己真实会选什么动作，而是直接看 “马路中间” 这个状态下，所有动作里价值最高的那个（比如 “快速跑过马路”，动作`a'`）。
 
-4. 更新经验
-
-   ：你会用 “真实走的一步 + 想象的最优下一步”（
+4. 更新经验：你会用 “真实走的一步 + 想象的最优下一步”（
 
    ```
    s,a,r,s'
    ```
-
+   
    四元组）来更新 “马路边 - 小步走” 的价值。
 
    - 你的经验是：“我在马路边选了小步走，到了中间，而中间最好的动作是快速跑，所以这个动作的价值是`r + γ*maxQ(s',a')`”。
    - 你参考了 “理想中的最优走法”，哪怕你自己真实下一步可能不会这么选。
-
    
 
 所以 Q-learning 是**离线算法**：它的更新只需要 “真实走的四元组”，下一步的动作是 “想象中的最优动作”，不需要是你真实选的，更激进、追求理论最优。
-
-
 
 接下来仍然在悬崖漫步环境下来实现 Q-learning 算法。
 
@@ -912,8 +902,6 @@ def update(self, s0, a0, r, s1):
 
 1. 计算 TD 误差：`td_error = r + self.gamma * self.Q_table[s1].max() - self.Q_table[s0, a0]`
 
-   
-
    - 先拆各个部分的含义：
      - `self.Q_table[s1].max()`：获取新状态`s1`下，所有动作的 Q 值中的**最大值**（对应公式里的`max_{a'} Q(s',a')`），这是 Q-learning 的核心 —— 不关心真实选的动作，只取 “理想中的最优动作” 的 Q 值。
      - `self.gamma * self.Q_table[s1].max()`：对未来最优 Q 值打折扣（`gamma`是折扣因子，控制未来奖励的权重）。
@@ -922,8 +910,6 @@ def update(self, s0, a0, r, s1):
      - `TD误差`：目标 Q 值 - 当前 Q 值，代表 “我们之前的估计和理想最优价值的差距”，差距越大，Q 值更新幅度越大。
 
 比如你在起点（s0）选了 “右”（a0），得到奖励 - 1（r），到了新状态 s1，Q-learning 不管你下一步真实选什么，只看 s1 状态下最好的动作值多少钱，然后用这个 “理想价值” 来修正 “起点 - 右” 的价值。
-
-
 
 需要注意的是，打印出来的回报是行为策略在环境中交互得到的，而不是 Q-learning 算法在学习的目标策略的真实回报。
 
@@ -947,15 +933,1474 @@ def update(self, s0, a0, r, s1):
 
 无模型的强化学习根据智能体与环境交互采样到的数据直接进行策略提升或者价值估计，第 5 章讨论的两种时序差分算法，即 Sarsa 和 Q-learning 算法，便是两种无模型的强化学习方法，本书在后续章节中将要介绍的方法也大多是无模型的强化学习算法。
 
-在基于模型的强化学习中，模型可以是事先知道的，也可以是根据智能体与环境交互采样到的数据学习得到的，然后用这个模型帮助策略提升或者价值估计。
+`在基于模型的强化学习中`，模型可以是事先知道的，也可以是根据智能体与环境交互采样到的数据学习得到的，然后用这个模型帮助策略提升或者价值估计。
 
-第 4 章讨论的两种动态规划算法，即策略迭代和价值迭代，则是基于模型的强化学习方法，在这两种算法中环境模型是事先已知的。本章即将介绍的 Dyna-Q 算法也是非常基础的基于模型的强化学习算法，不过它的环境模型是通过采样数据估计得到的。
+第 4 章讨论的两种动态规划算法，即策略迭代和价值迭代，则是基于模型的强化学习方法，在这两种算法中环境模型是事先已知的。本章即将介绍的 **Dyna-Q 算法**也是非常基础的基于模型的强化学习算法，不过它的环境模型是**通过采样数据估计得到**的。
+
+强化学习算法有两个重要的评价指标：一个是`算法收敛后的策略`在**初始状态下**的==期望回报==，另一个是==样本复杂度==，即算法达到收敛结果需要在真实环境中采样的样本数量。
+
+基于模型的强化学习算法由于具有一个环境模型，智能体可以额外和环境模型进行交互，对真实环境中样本的需求量往往就会减少，因此通常会比无模型的强化学习算法具有更低的样本复杂度。
+
+但是，环境模型可能并不准确，不能完全代替真实环境，因此基于模型的强化学习算法收敛后其策略的期望回报可能不如无模型的强化学习算法。
 
 
 
+**Dyna-Q 算法**，它是 Q-learning 的 “加强版”。
+
+Q-learning 是 “边和环境互动边学习”，而 Dyna-Q 是 “边和环境互动，边在脑子里模拟环境来复盘学习”。
+
+Dyna-Q 算法是一个经典的基于模型的强化学习算法。
+
+如图 6-1 所示，Dyna-Q 使用一种叫做 Q-planning 的方法来基于模型生成一些模拟数据，然后用模拟数据和真实数据一起改进策略。
+
+Q-planning 每次选取一个曾经访问过的状态，采取一个曾经在该状态下执行过的动作，通过模型得到转移后的状态以及奖励，并根据这个模拟数据，用 Q-learning 的更新方式来更新动作价值函数。
+
+![image-20260203112723578](RL基本原理-img/image-20260203112723578.png)
 
 
 
+![image-20260203114511884](RL基本原理-img/image-20260203114511884.png)
+
+> 更新 Q 值：`Q(s,a) ← Q(s,a) + α[r + γ max_{a'} Q(s',a') - Q(s,a)]`
+
+- **意思**：更新你的 “做菜笔记”，==用真实环境的反馈来修正步骤的价值==（这一步和 Q-learning 完全一样）。
+
+> 模拟学习循环：`for 次数n = 1 → N do`
+
+这是 Dyna-Q 最核心的部分，也是它和 Q-learning 的唯一区别 ——**“复盘学习”**。
+
+一句话总结:
+
+Dyna-Q 就像 “**学做菜时，不仅要亲手做，还要在脑子里反复复盘过去的步骤**”。
+
+亲手做（真实环境互动）保证经验是对的，脑子里复盘（模型模拟学习）让经验被反复利用，学得更快。
+
+在**每次与环境进行交互执行一次 Q-learning 之后**，Dyna-Q 会做==n==次 **Q-planning**。其中 Q-planning 的次数==N==是一个事先可以选择的超参数，`当N为 0 时`就是普通的 Q-learning。
+
+上述 Dyna-Q 算法是执行在一个离散并且确定的环境中，所以当看到一条经验数据![image-20260203115128410](RL基本原理-img/image-20260203115128410.png)时，可以直接对模型做出更新，即![image-20260203115138365](RL基本原理-img/image-20260203115138365.png)。
+
+**直接更新模型**：因为环境是**确定的**，所以只要你见过一次 `(s,a)` 对应的 `(r,s')`，就可以确定：**以后每次在 s 状态下执行 a 动作，得到的 r 和 s' 都是完全一样的**。
+
+所以你可以直接把模型 `M(s,a)` 设置成这个 `(r,s')`，==不用像随机环境那样需要多次观察来统计平均==
+
+比如：你在 “有鸡蛋和锅” 状态下执行 “打鸡蛋”，得到了 “+1 分” 和 “碗里有蛋液”，那你就可以直接在模型里记下 `M(有鸡蛋和锅, 打鸡蛋) = (+1, 碗里有蛋液)`，以后模拟时用这个值就 100% 准确。
+
+> 因为 Dyna-Q 假设环境是 “离散 + 确定” 的，所以它的模型 `M(s,a)` 可以做得非常简单 —— 只要存下每一条见过的经验就行，不用复杂的统计或概率估计。
+
+这也是为什么在之前的伪代码里，模型更新只需要 `M(s,a) ← r,s'` 这么简单的一步，不用像随机环境那样需要加权平均或其他复杂操作。
+
+在 “离散 + 确定” 的环境里，**“见过一次就等于永远正确”**，所以 Dyna-Q 可以直接把每次的真实经验存进模型，用来模拟复盘，不用反复验证。
+
+
+
+#### Dyna-Q 代码实践
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from tqdm import tqdm
+import random
+import time
+
+class CliffWalkingEnv:
+    def __init__(self, ncol, nrow):
+        self.nrow = nrow
+        self.ncol = ncol
+        self.x = 0  # 记录当前智能体位置的横坐标
+        self.y = self.nrow - 1  # 记录当前智能体位置的纵坐标
+def step(self, action):  # 外部调用这个函数来改变当前位置
+    # 4种动作, change[0]:上, change[1]:下, change[2]:左, change[3]:右。坐标系原点(0,0)
+    # 定义在左上角
+    change = [[0, -1], [0, 1], [-1, 0], [1, 0]]
+    self.x = min(self.ncol - 1, max(0, self.x + change[action][0]))
+    self.y = min(self.nrow - 1, max(0, self.y + change[action][1]))
+    next_state = self.y * self.ncol + self.x
+    reward = -1
+    done = False
+    if self.y == self.nrow - 1 and self.x > 0:  # 下一个位置在悬崖或者目标
+        done = True
+        if self.x != self.ncol - 1:
+            reward = -100
+    return next_state, reward, done
+
+def reset(self):  # 回归初始状态,起点在左上角
+    self.x = 0
+    self.y = self.nrow - 1
+    return self.y * self.ncol + self.x
+```
+
+然后我们在 Q-learning 的代码上进行简单修改，实现 Dyna-Q 的主要代码。最主要的修改是加入了环境模型`model`，用一个字典表示，每次在真实环境中收集到新的数据，就把它加入字典。根据字典的性质，若该数据本身存在于字典中，便不会再一次进行添加。
+
+
+
+```python
+class DynaQ:
+    """ Dyna-Q算法 """
+    def __init__(self,
+                 ncol,
+                 nrow,
+                 epsilon,
+                 alpha,
+                 gamma,
+                 n_planning,
+                 n_action=4):
+        self.Q_table = np.zeros([nrow * ncol, n_action])  # 初始化Q(s,a)表格
+        self.n_action = n_action  # 动作个数
+        self.alpha = alpha  # 学习率
+        self.gamma = gamma  # 折扣因子
+        self.epsilon = epsilon  # epsilon-贪婪策略中的参数    
+    self.n_planning = n_planning  #执行Q-planning的次数, 对应1次Q-learning
+    self.model = dict()  # 环境模型
+
+def take_action(self, state):  # 选取下一步的操作
+    if np.random.random() < self.epsilon:
+        action = np.random.randint(self.n_action)
+    else:
+        action = np.argmax(self.Q_table[state])
+    return action
+
+def q_learning(self, s0, a0, r, s1):
+    td_error = r + self.gamma * self.Q_table[s1].max(
+    ) - self.Q_table[s0, a0]
+    self.Q_table[s0, a0] += self.alpha * td_error
+
+def update(self, s0, a0, r, s1):
+    self.q_learning(s0, a0, r, s1)
+    self.model[(s0, a0)] = r, s1  # 将数据添加到模型中
+    for _ in range(self.n_planning):  # Q-planning循环
+        # 随机选择曾经遇到过的状态动作对
+        (s, a), (r, s_) = random.choice(list(self.model.items()))
+        self.q_learning(s, a, r, s_)
+```
+
+ 核心学习方法：`q_learning`（和纯 Q-learning 完全一致）
+
+```python
+def q_learning(self, s0, a0, r, s1):
+    td_error = r + self.gamma * self.Q_table[s1].max() - self.Q_table[s0, a0]
+    self.Q_table[s0, a0] += self.alpha * td_error
+```
+
+- 逻辑：这就是纯 Q-learning 的 Q 值更新方法，逐句解释（回顾）：
+  1. 计算 TD 误差：`目标Q值（当前奖励+未来最优Q值） - 当前Q值`。
+  2. 更新当前「状态 - 动作」对的 Q 值，用学习率`alpha`控制更新幅度。
+  3. 核心亮点：Dyna-Q 把 Q-learning 的更新逻辑封装成独立方法，既用于真实环境学习，也用于模拟复盘学习，实现代码复用。
+
+> 核心增强方法：`update`（真实学习 + 模拟复盘，Dyna-Q 的核心！）
+
+包含两个关键步骤：真实环境学习、Q-planning 模拟复盘，
+
+```python
+def update(self, s0, a0, r, s1):    # 步骤1：真实环境学习（和Q-learning一样，调用q_learning方法更新Q值）    
+	self.q_learning(s0, a0, r, s1)
+```
+
+第一步：真实环境学习
+
+- 调用`q_learning`方法，用真实环境返回的`(s0, a0, r, s1)`更新 Q 表，这一步和纯 Q-learning 完全一致。
+- 作用：保证学习的经验是 “真实有效的”，不会因为模拟复盘而偏离真实环境。
+
+```python
+    \# 步骤2：将真实经验存入模型（填充记忆库，为后续复盘做准备）    
+    self.model[(s0, a0)] = r, s1  # 字典的键是(s0,a0)，值是(r,s1)，直接覆盖（因为环境是确定的，一次经验即永久正确）
+```
+
+第二步：存储真实经验到模型
+
+- 逻辑：将真实环境得到的「状态 - 动作 - 奖励 - 新状态」存入`self.model`字典。
+- 关键：因为悬崖行走环境是**离散确定环境**，同一个`(s0, a0)`对应的`(r, s1)`永远不变，所以直接用`=`赋值覆盖即可，无需复杂统计。
+
+第三步：Q-planning 模拟复盘（Dyna-Q 的核心增强点）
+
+- 循环次数：`self.n_planning`，即每次真实学习后，要复盘的次数。
+- 步骤 3.1：随机抽取过往经验
+  - `list(self.model.items())`：将字典的键值对转换成列表，方便随机选择。
+  - `random.choice()`：从列表中随机抽取一个元素，得到`(s,a)`（过往的状态 - 动作）和`(r,s_)`（对应的过往反馈）。
+  - 大白话：从 “记忆库” 里随便翻出一条以前的真实经验，比如 “上次在起点选了向右，得到奖励 - 1，到了右边一格”。
+- 步骤 3.2：用模拟经验更新 Q 表
+  - 直接调用`q_learning`方法，传入抽取的模拟经验`(s, a, r, s_)`，更新 Q 表。
+  - 大白话：用翻出来的过往经验，再重新学习一次，加深对这个动作价值的理解，相当于 “复盘巩固”。
+- 核心作用：不用和真实环境互动，就能反复利用过往经验学习，大幅提高学习效率，减少真实试错的次数。
+
+下面是 Dyna-Q 算法在悬崖漫步环境中的训练函数，它的输入参数是 Q-planning 的步数。
+
+```python
+def DynaQ_CliffWalking(n_planning):
+    ncol = 12
+    nrow = 4
+    env = CliffWalkingEnv(ncol, nrow)
+    epsilon = 0.01
+    alpha = 0.1
+    gamma = 0.9
+    agent = DynaQ(ncol, nrow, epsilon, alpha, gamma, n_planning)
+    num_episodes = 300  # 智能体在环境中运行多少条序列
+return_list = []  # 记录每一条序列的回报
+for i in range(10):  # 显示10个进度条
+    # tqdm的进度条功能
+    with tqdm(total=int(num_episodes / 10),
+              desc='Iteration %d' % i) as pbar:
+        for i_episode in range(int(num_episodes / 10)):  # 每个进度条的序列数
+            episode_return = 0
+            state = env.reset()
+            done = False
+            while not done:
+                action = agent.take_action(state)
+                next_state, reward, done = env.step(action)
+                episode_return += reward  # 这里回报的计算不进行折扣因子衰减
+                agent.update(state, action, reward, next_state)
+                state = next_state
+            return_list.append(episode_return)
+            if (i_episode + 1) % 10 == 0:  # 每10条序列打印一下这10条序列的平均回报
+                pbar.set_postfix({
+                    'episode':
+                    '%d' % (num_episodes / 10 * i + i_episode + 1),
+                    'return':
+                    '%.3f' % np.mean(return_list[-10:])
+                })
+            pbar.update(1)
+return return_list
+```
+
+`return_list`：空列表，用于存储每一局训练的总回报（每一局结束后，把`episode_return`添加进去）。
+
+外层循环`for i in range(10)`：将 300 局训练分成 10 个批次，每个批次 30 局，对应一个进度条，方便清晰查看训练进度（避免一个超长进度条，提升可读性）。
+
+`tqdm`：进度条工具，`total=int(num_episodes/10)`指定每个进度条的总步数（30），`desc='Iteration %d' % i`设置进度条标题（显示当前批次）。
+
+内层单局训练循环（核心，每一局的完整流程）:
+
+```python
+for i_episode in range(int(num_episodes / 10)):  # 每个进度条对应30局，循环30次    
+    episode_return = 0  # 初始化当前局的总回报（总奖励）    
+    state = env.reset()  # 重置环境，将智能体放回起点，返回初始状态    
+    done = False  # 初始化任务结束标志，False表示未结束
+```
+
+
+
+```python
+    while not done:  # 单局内的步骤循环，直到任务结束（done=True）        
+        action = agent.take_action(state)  # 步骤1：智能体根据当前状态选动作（ε-贪心）        
+        next_state, reward, done = env.step(action)  # 步骤2：执行动作，获取环境反馈（新状态、奖励、是否结束）        
+        episode_return += reward  # 步骤3：累加当前步奖励，更新当前局总回报（不折扣，仅统计实际总奖励）        
+        agent.update(state, action, reward, next_state)  # 步骤4：核心！调用DynaQ的update方法，完成「真实学习+模拟复盘」        
+        state = next_state  # 步骤5：更新当前状态，为下一步循环做准备
+```
+
+这是单局训练的核心循环，逐步骤解释（重点讲和 Q-learning 的异同）：
+
+1. 选动作：`agent.take_action(state)`，和 Q-learning 一致，用 ε- 贪心选动作。
+2. 执行动作：`env.step(action)`，调用环境的步骤方法，获取反馈，和 Q-learning 一致。
+3. 累加回报：`episode_return += reward`，统计当前局的总奖励，和 Q-learning 一致（注意：这里没有用折扣因子，只是统计实际拿到的总奖励，用于评估学习效果）。
+4. 智能体更新：agent.update(...)，这是唯一和 Q-learning 的差异点：
+   - 调用的是`DynaQ`类的`update`方法，内部会完成 “真实 Q-learning 更新 +`n_planning`次模拟复盘”。
+   - 而纯 Q-learning 调用的是`QLearning`类的`update`方法，仅完成真实 Q-learning 更新。
+   - 其余参数（`state, action, reward, next_state`）完全一致，流程兼容。
+5. 更新状态：`state = next_state`，和 Q-learning 一致，无需更新动作（因为 Dyna-Q 继承了 Q-learning 的离线特性，不依赖下一个真实动作）。
+
+
+
+接下来对结果进行可视化，通过调整参数，我们可以观察 Q-planning 步数对结果的影响（另见彩插图 3）。若 Q-planning 步数为 0，Dyna-Q 算法则退化为 Q-learning。
+
+```python
+np.random.seed(0)
+random.seed(0)
+n_planning_list = [0, 2, 20]
+for n_planning in n_planning_list:
+    print('Q-planning步数为：%d' % n_planning)
+    time.sleep(0.5) # 暂停0.5秒，让打印信息和后续进度条不重叠，提升可读性
+    return_list = DynaQ_CliffWalking(n_planning) # 调用训练函数，获取对应复盘步数的回报列表
+    episodes_list = list(range(len(return_list)))# 生成局数列表（对应x轴）
+    plt.plot(episodes_list,
+             return_list,
+             label=str(n_planning) + ' planning steps')
+plt.legend()
+plt.xlabel('Episodes')
+plt.ylabel('Returns')
+plt.title('Dyna-Q on {}'.format('Cliff Walking'))
+plt.show()
+```
+
+`np.random.seed(0)`：固定`numpy`库的随机数生成器种子（Dyna-Q 的 Q 表初始化、ε- 贪心的随机探索都用到了`numpy`的随机方法）。
+
+`random.seed(0)`：固定 Python 内置`random`库的随机数生成器种子（Dyna-Q 的 Q-planning 环节，从`model`中随机抽取经验用到了`random.choice()`）。
+
+- 核心作用：**让实验结果可复现**，无论你运行多少次这段代码，得到的 3 条学习曲线都完全一致，方便对比和分析，这是强化学习实验中的标准操作。
+
+新手提示：如果不固定随机种子，每次运行代码的随机探索和随机复盘都会不同，曲线也会波动，无法准确对比不同`n_planning`的效果。
+
+定义要对比的 Q-planning 步数列表:n_planning_list = [0, 2, 20]
+
+逻辑：定义一个包含 3 个值的列表，分别对应 3 种复盘策略：
+
+1. `n_planning=0`：每次真实学习后，不进行任何模拟复盘，**等价于纯 Q-learning**（作为基准对比组）。
+2. `n_planning=2`：每次真实学习后，复盘 2 次，轻度增强学习效率。
+3. `n_planning=20`：每次真实学习后，复盘 20 次，重度增强学习效率。
+
+选择逻辑：覆盖 “无复盘”“少量复盘”“大量复盘” 三种场景，能清晰展示复盘步数对学习效果的影响趋势。
+
+`episodes_list`：x 轴数据（训练局数）。
+
+`return_list`：y 轴数据（每局总回报）。
+
+`label=str(n_planning) + ' planning steps'`：为当前曲线添加标签，后续在图例中展示，方便区分不同曲线对应的复盘步数。
+
+```python
+plt.legend()  # 显示图例（对应每条曲线的label，区分不同复盘步数） 
+plt.xlabel('Episodes')  # 设置x轴标签：训练局数 
+plt.ylabel('Returns')  # 设置y轴标签：每局总回报 
+plt.title('Dyna-Q on {}'.format('Cliff Walking'))  # 设置图表标题：Dyna-Q在悬崖行走环境上的效果 
+plt.show()  # 显示绘制完成的图表
+```
+
+`plt.legend()`：显示图例，图例中的内容就是`plt.plot()`中设置的`label`，能清晰区分 3 条曲线分别对应哪种复盘步数，这是多曲线对比图的必备步骤。
+
+`plt.xlabel()`/`plt.ylabel()`：设置坐标轴标签，让图表更规范，读者能快速理解 x 轴和 y 轴的含义。
+
+`plt.title()`：设置图表标题，明确图表的核心内容（Dyna-Q 在悬崖行走环境上的学习效果对比）。
+
+`plt.show()`：弹出图表窗口，展示最终绘制的 3 条对比曲线，这是`matplotlib`绘图的最后一步，用于显示结果。
+
+![image-20260203163300157](RL基本原理-img/image-20260203163300157.png)
+
+从上述结果中我们可以很容易地看出，随着 Q-planning 步数的增多，Dyna-Q 算法的收敛速度也随之变快。当然，并不是在所有的环境中，都是 Q-planning 步数越大则算法收敛越快，这取决于环境是否是确定性的，以及环境模型的精度。在上述悬崖漫步环境中，状态的转移是完全确定性的，构建的环境模型的精度是最高的，所以可以通过增加 Q-planning 步数来直接降低算法的样本复杂度。
+
+**构建的环境模型精度是最高的**
+
+因为环境是确定的，Dyna-Q 的`model`字典只要存下一次真实经验（比如 “起点→右→奖励 - 1→右边一格”），就永远是 100% 准确的，不会有任何误差。
+
+**降低算法的样本复杂度**
+
+样本复杂度是指算法收敛到最优策略需要的**真实环境互动次数**。因为 Q-planning 用的是模拟经验（不需要和真实环境互动），增加复盘步数就相当于用更多 “模拟做菜” 来代替 “真实做菜”，从而减少需要的真实试错次数。
+
+#### 小结 
+
+本章讲解了一个经典的基于模型的强化学习算法 Dyna-Q，并且通过调整在悬崖漫步环境下的 Q-planning 步数，直观地展示了 Q-planning 步数对于收敛速度的影响。我们发现基于模型的强化学习算法 Dyna-Q 在以上环境中获得了很好的效果，但这些环境比较简单，模型可以直接通过经验数据得到。如果环境比较复杂，状态是连续的，或者状态转移是随机的而不是决定性的，如何学习一个比较准确的模型就变成非常重大的挑战，这直接影响到基于模型的强化学习算法能否应用于这些环境并获得比无模型的强化学习更好的效果。
+
+
+
+## 进阶篇
+
+### DQN 算法
+
+在第 5 章讲解的 Q-learning 算法中，我们以矩阵的方式建立了一张存储每个状态下所有动作值的表格。
+
+表格中的**每一个动作价值Q (s,a)**表示在状态s下选择动作a然后继续遵循某一策略,预期能够得到的期望回报。
+
+然而，这种用`表格存储动作价值`的做法只在环境的==状态和动作都是离散的==，并且==空间都比较小==的情况下适用，我们之前进行代码实战的几个环境都是如此（如悬崖漫步）。
+
+当状态或者动作数量非常大的时候，这种做法就不适用了。例如，当状态是一张 RGB 图像时，假设图像大小是210x160x3，此时一共有![image-20260203171637629](RL基本原理-img/image-20260203171637629.png)种状态，在计算机中存储这个数量级的值表格是不现实的。更甚者，当状态或者动作连续的时候，就有无限个状态动作对，我们更加无法使用这种表格形式来记录各个状态动作对的值。【一张 RGB 图像的每个像素由 “红（R）、绿（G）、蓝（B)” 三个颜色通道组成，而每个通道的亮度值通常用**8 位二进制数**-256，0-255来表示】
+
+单个像素的颜色组合数就是：`256（红的可能值） × 256（绿的可能值） × 256（蓝的可能值） = 256³`。
+
+因为每个像素的颜色都是独立的，整幅图像的 “状态数” 就是所有像素的颜色可能性的乘积：
+
+![image-20260203172152721](RL基本原理-img/image-20260203172152721.png)
+
+对于这种情况，我们需要用函数拟合的方法来估计Q值，即将这个复杂的Q值表格视作数据，使用一个参数化的函数Qθ来拟合这些数据。很显然，这种函数拟合的方法存在一定的精度损失，因此被称为近似方法。我们今天要介绍的 DQN 算法便可以用来解决连续状态下离散动作的问题。
+
+#### CartPole 环境
+
+以图 7-1 中所示的所示的车杆（[CartPole](https://github.com/openai/gym/wiki/CartPole-v0)）环境为例，它的`状态值就是连续的，动作值是离散的`。
+
+![img](RL基本原理-img/cartpole.e4a03ca5.gif)
+
+图 7-1 CartPole环境示意图
+
+在车杆环境中，有一辆小车，智能体的任务是通过左右移动保持车上的杆竖直，若杆的倾斜度数过大，或者车子离初始位置左右的偏离程度过大，或者坚持时间到达 200 帧，则游戏结束。
+
+智能体的状态是一个维数为 4 的向量，每一维都是连续的，其动作是离散的，动作空间大小为 2，详情参见表 7-1 和表 7-2。在游戏中每坚持一帧，智能体能获得分数为 1 的奖励，坚持时间越长，则最后的分数越高，坚持 200 帧即可获得最高的分数。
+
+![image-20260203172711652](RL基本原理-img/image-20260203172711652.png)
+
+![image-20260203172742751](RL基本原理-img/image-20260203172742751.png)
+
+
+
+#### DQN
+
+现在我们想在类似车杆的环境中得到动作价值函数Q(s,a), 
+
+由于状态每一维度的值都是连续的，无法使用表格记录，因此一个常见的解决方法便是使用**函数拟合**（function approximation）的思想。由于神经网络具有强大的表达能力，因此我们可以用一个神经网络来表示函数Q。
+
+若动作是连续（无限）的，神经网络的输入是状态s和动作a，然后输出一个标量，表示在状态s下采取动作a能获得的价值。
+
+若动作是离散（有限）的，除了可以采取动作连续情况下的做法，我们还可以只将状态s输入到神经网络中，使其同时输出每一个动作的Q值。通常 DQN（以及 Q-learning）只能处理动作离散的情况，因为在函数Q的更新过程中有max~a~这一操作。
+
+假设神经网络用来拟合函数w的参数是 ，即每一个状态s下所有可能动作a的Q值我们都能表示为Q~w~(s,a)。
+
+我们将用于拟合函数函数的神经网络称为**Q 网络**，如图 7-2 所示。
+
+![image-20260203173944661](RL基本原理-img/image-20260203173944661.png)
+
+那么 Q 网络的损失函数是什么呢？我们先来回顾一下 Q-learning 的更新规则（参见 5.5 节）：
+
+![image-20260203174025604](RL基本原理-img/image-20260203174025604.png)
+
+上述公式用**时序差分**（temporal difference，TD）学习目标![image-20260203174132164](RL基本原理-img/image-20260203174132164.png)来增量式更新，也就是说要使Q(s,a)和 TD 目标靠近。
+
+于是，对于一组数据，我们可以很自然地将 Q 网络的损失函数构造为均方误差的形式：
+
+![image-20260203174328611](RL基本原理-img/image-20260203174328611.png)
+
+至此，我们就可以将 Q-learning 扩展到神经网络形式——**深度 Q 网络**（deep Q network，DQN）算法。
+
+由于 DQN 是离线策略算法，因此我们在收集数据的时候可以使用一个ε-贪婪策略来平衡探索与利用，将收集到的数据存储起来，在后续的训练中使用。DQN 中还有两个非常重要的模块——**经验回放**和**目标网络**，它们能够帮助 DQN 取得稳定、出色的性能。
+
+##### 经验回放
+
+在一般的有监督学习中，假设训练数据是独立同分布的，我们每次训练神经网络的时候从训练数据中随机采样一个或若干个数据来进行梯度下降，随着学习的不断进行，每一个训练数据会被使用多次。在原来的 Q-learning 算法中，每一个数据只会用来更新一次值。为了更好地将 Q-learning 和深度神经网络结合，DQN 算法采用了**经验回放**（experience replay）方法，具体做法为维护一个**回放缓冲区**，将每次从环境中采样得到的四元组数据（状态、动作、奖励、下一状态）存储到回放缓冲区中，训练 Q 网络的时候再从回放缓冲区中随机采样若干数据来进行训练。
+
+这么做可以起到以下两个作用。
+
+（1）使样本满足独立假设。在 MDP 中交互采样得到的数据本身不满足独立假设，因为这一时刻的状态和上一时刻的状态有关。非独立同分布的数据对训练神经网络有很大的影响，会使神经网络拟合到最近训练的数据上。采用经验回放可以打破样本之间的相关性，让其满足独立假设。
+
+（2）提高样本效率。每一个样本可以被使用多次，十分适合深度神经网络的梯度学习。
+
+> 独立同分布（i.i.d.，Independent and Identically Distributed）就是指：
+>
+> 你拿到的每一个样本（每一道题），**既和其他样本没有关联**，又**都是用同一个规则生成的**。
+>
+> 比如：从一副洗好的扑克牌里，每次抽一张牌，然后放回去再洗牌。
+>
+> - 独立：每次抽牌的结果和上一次无关（因为洗了牌）。
+> - 同分布：每次抽牌都是从同一副牌里抽，每张牌被抽到的概率都是 1/54。
+
+>非独立同分布的数据对训练神经网络有很大的影响，会使神经网络拟合到最近训练的数据上。
+>
+>用驾考例子解释：
+>
+>- 如果你的驾考题是**按顺序刷的**（比如先刷 100 道 “交通标志” 题，再刷 100 道 “扣分规则” 题），这就是 “非独立同分布”（题和题之间有顺序关联，生成规则变了）。
+>- 神经网络刷完 100 道交通标志题后，会把交通标志的规律学得很好，但当你刷扣分规则题时，它会 “拟合到最近的扣分规则题”，把之前学的交通标志知识覆盖掉，学不到通用的驾考规律。
+>
+>经验回放的解决办法：
+>
+>从本子里**随机抽题**（比如一会儿抽交通标志题，一会儿抽扣分规则题），打破了题目的顺序关联，让每道题都变成独立的，满足神经网络 “独立同分布” 的学习要求，这样神经网络才能学到通用的规律，而不是只记最近的题。
+
+
+
+##### 目标网络
+
+DQN 算法最终更新的目标是让Q~w~(s,a)逼近![image-20260203203554999](RL基本原理-img/image-20260203203554999.png)，由于 TD 误差目标本身就包含神经网络的输出，因此在更新网络参数的同时目标也在不断地改变，这非常容易造成神经网络训练的不稳定性。
+
+为了解决这一问题，DQN 便使用了**目标网络**（target network）的思想：既然训练过程中 Q 网络的不断更新会导致目标不断发生改变，不如暂时先将 TD 目标中的 Q 网络固定住。为了实现这一思想，我们需要利用两套 Q 网络。
+
+![image-20260203203853647](RL基本原理-img/image-20260203203853647.png)
+
+综上所述，DQN 算法的具体流程如下：
+
+![image-20260203204844927](RL基本原理-img/image-20260203204844927.png)
+
+>1. 当前网络 **Qω(s,a)**
+>
+>    → 你自己（练车的学员）
+>
+>   - 负责实时判断路况、选择怎么开车（选动作），并不断修正自己的驾驶策略（更新网络参数）。
+>
+>2. 目标网络 **Qω−(s,a)**
+>
+>    → 你的教练
+>
+>   - 他的驾驶策略相对稳定，不会天天变，用来给你提供 “标准答案”（计算目标 Q 值），每隔一段时间才会根据你的进步更新一次。
+>
+>3. 经验回放池 **R**
+>
+>    → 你的 “练车日志本”
+>
+>   - 每次练车的 “路况 - 操作 - 教练反馈 - 下一个路况”，都会记在这个本子里，用来后续复习巩固。
+>
+>------
+>
+>逐行拆解伪代码（学车版）
+>
+>🔹 初始化环节（练车前的准备）
+>
+>```
+>用随机的网络参数ω初始化网络Q_ω(s,a)
+>```
+>
+>👉 大白话：你刚开始练车，还没什么经验，驾驶习惯是随机的（比如偶尔猛踩油门、偶尔急刹车），相当于 “初始驾驶水平是随机的”。
+>
+>```
+>复制相同的参数ω⁻ ← ω来初始化目标网络Q_ω⁻
+>```
+>
+>👉 大白话：教练一开始用和你一样的初始经验来指导你，相当于 “教练的初始驾驶水平和你一样，后续会慢慢更新”。
+>
+>```
+>初始化经验回放池R
+>```
+>
+>👉 大白话：准备一个空白的练车日志本，用来记录每次练车的细节。
+>
+>------
+>
+>🔹 外层循环：`for 序列e = 1 → E do`
+>
+>👉 大白话：你要完整地练 `E` 次路线（比如练 100 次完整的科目三路线），每次都从起点开始。
+>
+>```
+>获取环境初始状态s₁
+>```
+>
+>👉 大白话：每次练车开始，你都回到路线的起点（比如 “科目三起点，车头朝向正前方”）。
+>
+>------
+>
+>🔹 内层循环：`for 时间步t = 1 → T do`
+>
+>👉 大白话：这是你练一次路线里的每一个驾驶步骤（比如 “起步→变道→过路口→停车”，共 `T` 步）。
+>
+>```
+>根据当前网络Q_ω(s,a)以ε-贪婪策略选择动作a_t
+>```
+>
+>👉 大白话：你根据自己当前的驾驶经验（当前网络）来选动作：
+>
+>- 大部分时候（`1-ε` 概率）：按你认为的最佳方式开（比如 “过路口减速”）。
+>- 偶尔（`ε` 概率）：瞎试试新操作（比如 “过路口加速”），用来探索新的驾驶方式（平衡 “利用经验” 和 “探索新方法”）。
+>
+>```
+>执行动作a_t，获得回报r_t，环境状态变为s_{t+1}
+>```
+>
+>👉 大白话：你执行了这个驾驶动作（比如 “减速过路口”），教练给你反馈（比如 “做得好，加 1 分” 或 “压线了，扣 10 分”），然后你开到了下一个路况（比如 “路口后的直行车道”）。
+>
+>```
+>将(s_t, a_t, r_t, s_{t+1})存储进回放池R中
+>```
+>
+>👉 大白话：把这次的 “路况（路口）- 操作（减速）- 反馈（+1 分）- 下一个路况（直行车道）” 记到你的练车日志本里。
+>
+>```
+>若R中数据足够，从R中采样N个数据{(s_i,a_i,r_i,s_{i+1})}_{i=1,...,N}
+>```
+>
+>👉 大白话：等日志本里的记录足够多（比如超过 100 条），就从里面**随机抽 N 条旧记录**（比如抽 5 条）来复习（而不是只看刚发生的新记录）。
+>
+>```
+>对每个数据，用目标网络计算y_i = r_i + γ max_a Q_{ω⁻}(s_{i+1}, a)
+>```
+>
+>👉 大白话：对每条抽出来的旧记录，让教练（目标网络）根据 “下一个路况”，给出他认为的**最佳操作的得分**（目标 Q 值）。
+>
+>- 比如旧记录是 “路口→减速→+1 分→直行车道”，教练会说：“在直行车道这个路况下，最佳操作是‘保持匀速’，得分是 0.9 分”，所以目标得分 `y_i = 1 + 0.9×0.9 = 1.81`（`γ` 是折扣因子，相当于教练对未来得分的重视程度）。
+>
+>```
+>最小化目标损失L = 1/N ∑_i (y_i - Q_ω(s_i, a_i))²，以此更新当前网络Q_ω
+>```
+>
+>👉 大白话：对比你当时的操作得分（`Q_ω(s_i, a_i)`）和教练的目标得分（`y_i`），计算差距（损失），然后修正自己的驾驶策略（比如 “原来减速过路口的得分应该更高，以后过路口要更稳”），让自己的得分越来越接近教练的标准答案。
+>
+>```
+>更新目标网络
+>```
+>
+>👉 大白话：每隔一段时间（比如练完 10 次路线），教练把他的驾驶策略更新成你当前的最新水平（相当于 “教练也在学习你的进步，更新自己的标准答案”），避免教练的标准太旧。
+
+
+
+#### DQN 代码实践
+
+从 DQN 算法开始，我们将会用到`rl_utils`库，它包含一些专门为本书准备的函数，如绘制移动平均曲线、计算优势函数等，不同的算法可以一起使用这些函数。为了能够调用`rl_utils`库，请从本书的[GitHub 仓库](https://github.com/boyu-ai/Hands-on-RL/blob/main/rl_utils.py)下载`rl_utils.py`文件。
+
+```python
+import random #R
+import gym
+import numpy as np#R
+import collections#R
+from tqdm import tqdm
+import torch#Q
+import torch.nn.functional as F# 包含ReLU等激活函数 #Q
+import matplotlib.pyplot as plt
+import rl_utils
+```
+
+首先定义经验回放池的类，主要包括加入数据、采样数据两大函数。
+
+```python
+class ReplayBuffer:
+    ''' 经验回放池 '''
+    def __init__(self, capacity):
+        self.buffer = collections.deque(maxlen=capacity)  # 队列,先进先出
+def add(self, state, action, reward, next_state, done):  # 将数据加入buffer
+    self.buffer.append((state, action, reward, next_state, done))
+
+def sample(self, batch_size):  # 从buffer中采样数据,数量为batch_size
+    transitions = random.sample(self.buffer, batch_size)
+    state, action, reward, next_state, done = zip(*transitions)
+    return np.array(state), action, reward, np.array(next_state), done
+
+def size(self):  # 目前buffer中数据的数量
+    return len(self.buffer)
+```
+
+初始化一个有最大容量限制的队列，作为经验存储容器。
+
+提供`add`方法：把智能体的单次经验（状态、动作、奖励等）存入仓库。
+
+提供`sample`方法：从仓库中**随机抽取指定数量的批量经验**（==核心==，满足独立同分布）。
+
+提供`size`方法：查询仓库当前存储的经验数量（用于判断是否足够采样训练）。
+
+1.类定义与初始化方法：`__init__`（准备一个有容量限制的 “仓库”）
+
+核心亮点：用`collections.deque`实现队列，自动处理 “仓库满了删旧经验” 的逻辑，无需手动编写清理代码，高效简洁。
+
+```py
+import collections 
+import random 
+import numpy as np 
+class ReplayBuffer:    ''' 经验回放池 '''    
+def __init__(self, capacity):        self.buffer = collections.deque(maxlen=capacity)  # 队列,先进先出
+```
+
+依赖库：用到了`collections.deque`（双端队列），这是 Python 内置的高效队列结构，比普通列表更适合 “添加元素 + 自动删旧元素” 的场景。为什么不用普通列表？普通列表`append`（末尾添加）很快，但删除头部元素很慢，而`deque`的自动清理是高效的`O(1)`时间复杂度，适合大量经验的存储和清理。
+
+2. 添加经验方法：`add`（把单次经验存入仓库）
+
+方法参数：这是强化学习中标准的**经验五元组**，记录了智能体的一次完整互动：
+
+- `state`：当前状态（比如 CartPole 的 4 个数值：小车位置、速度等）。
+- `action`：智能体在当前状态下执行的动作（比如 CartPole 的 “左” 或 “右”）。
+- `reward`：执行动作后获得的即时奖励（比如 CartPole 的 “+1”，表示杆子没倒）。
+- `next_state`：执行动作后进入的下一个状态（比如小车移动后的新位置、杆子的新角度）。
+- `done`：是否结束当前局（`True`表示杆子倒了 / 小车出界，`False`表示继续）。
+
+3. 随机采样方法：`sample`（核心！从仓库抽批量经验用于训练）
+
+```python
+def sample(self, batch_size):  # 从buffer中采样数据,数量为batch_size
+        transitions = random.sample(self.buffer, batch_size)
+        state, action, reward, next_state, done = zip(*transitions)
+        return np.array(state), action, reward, np.array(next_state), done
+```
+
+`transitions = random.sample(self.buffer, batch_size)`：
+
+- `random.sample(列表/队列, 采样数量)`：从队列中**随机抽取`batch_size`个不重复的元素**（比如`batch_size=32`，就是随机抽 32 条经验）。
+- 核心作用：打破经验的顺序关联（比如原本是 “步骤 1→步骤 2→步骤 3” 的连续经验，随机抽取后变成 “步骤 5→步骤 2→步骤 9”），满足神经网络需要的 ** 独立同分布（iid）** 假设，让训练更稳定。
+
+`state, action, reward, next_state, done = zip(*transitions)`：
+
+- 这是新手最容易困惑的一句，我们拆成两步理解：
+  - 第一步：`*transitions`：对`transitions`进行**解包**。`transitions`是一个列表，每个元素是一个 “五元组（s,a,r,s',done）”，解包后相当于把所有五元组作为独立参数传给`zip`。
+  - 第二步：`zip(...)`：对解包后的所有五元组进行**按位置打包**。把所有五元组的第 1 个元素（`state`）打包成一个元组，第 2 个元素（`action`）打包成一个元组，以此类推。
+- 大白话：把摸出来的 32 张卡片，按 “状态、动作、奖励” 等分类整理，比如把所有卡片上的 “状态” 收集到一起，“动作” 收集到一起，方便后续给神经网络喂数据。
+
+`return np.array(state), action, reward, np.array(next_state), done`：
+
+- 把`state`和`next_state`转换成`numpy`数组：因为后续神经网络训练需要接收`numpy`数组格式的输入，而`action`、`reward`、`done`保持元组即可（后续可按需转换）。
+- 返回整理好的 5 组数据，直接用于 DQN 的网络训练（计算损失、更新网络参数）。
+
+4. 查询数量方法：`size`（判断是否足够采样）
+
+```python
+    def size(self):  # 目前buffer中数据的数量
+        return len(self.buffer)
+```
+
+非常简单，返回队列当前的元素数量（即已存储的经验条数）。
+
+核心作用：在 DQN 训练中，需要先判断`buffer.size() >= batch_size`（比如经验数≥32），才会开始采样训练，避免经验不足时采样出错。
+
+
+
+然后定义一个只有一层隐藏层的 Q 网络。
+
+```python
+class Qnet(torch.nn.Module):
+    ''' 只有一层隐藏层的Q网络 '''
+    def __init__(self, state_dim, hidden_dim, action_dim):
+        super(Qnet, self).__init__()# 调用父类Module的初始化方法，必须有
+        self.fc1 = torch.nn.Linear(state_dim, hidden_dim)# 第一层全连接层（输入→隐藏）
+        self.fc2 = torch.nn.Linear(hidden_dim, action_dim)# 第二层全连接层（隐藏→输出）
+    def forward(self, x):
+        x = F.relu(self.fc1(x))  # 隐藏层使用ReLU激活函数
+        return self.fc2(x)
+```
+
+类定义与继承：`class Qnet(torch.nn.Module):`
+
+继承`torch.nn.Module`：PyTorch 中所有神经网络都必须继承这个基类，它提供了网络参数管理、设备迁移、训练模式切换等核心功能，没有它就无法正常训练网络。
+
+`super(Qnet, self).__init__()`：必须调用父类的初始化方法，初始化`Module`中的核心属性（比如网络参数列表`parameters()`），少了这句话会报错。
+
+全连接层（`torch.nn.Linear`）：也叫 “线性层”，是最基础的神经网络层，作用是对输入数据进行**线性变换**（`y = Wx + b`，W 是权重矩阵，b 是偏置项）。
+
+- `self.fc1`：输入层→隐藏层，输入维度是`state_dim`（比如 4），输出维度是`hidden_dim`（比如 128），相当于把 4 维的状态数据，转换成 128 维的中间特征。
+- `self.fc2`：隐藏层→输出层，输入维度是`hidden_dim`（比如 128），输出维度是`action_dim`（比如 2），相当于把 128 维的中间特征，转换成 2 个动作对应的 Q 值。
+
+大白话类比：把网络想象成一个 “价值评估机器”：
+
+- `fc1`：把 “4 个状态指标”（小车位置、速度等）交给 128 个 “数据处理员工”，每个员工输出一个处理后的特征。
+- `fc2`：把 128 个员工的处理结果，汇总成 “2 个动作的价值评分”（左移的 Q 值、右移的 Q 值）。
+
+补充：全连接层的权重和偏置会被自动初始化，并且会在后续训练中通过梯度下降更新，无需手动设置。
+
+2. 前向传播方法：`forward`（核心！定义数据计算流程）
+
+```python
+def forward(self, x):
+        x = F.relu(self.fc1(x))  # 隐藏层使用ReLU激活函数# 隐藏层使用ReLU激活函数，引入非线性
+        return self.fc2(x)# 输出层直接返回结果，不使用激活函数
+```
+
+这是神经网络的核心方法，定义了输入数据`x`如何通过网络层计算得到输出，逐句拆解：
+
+1. 输入`x`：是`torch.Tensor`（张量）格式的环境状态，形状为`[批量大小, state_dim]`（比如`[32, 4]`，表示 32 个样本，每个样本 4 维状态）。
+
+2. ```
+   x = F.relu(self.fc1(x))
+   ```
+
+   ：
+
+   - 第一步：`self.fc1(x)`：将输入`x`传入第一层全连接层，进行线性变换，得到隐藏层的线性输出（形状为`[32, 128]`）。
+   - 第二步：`F.relu(...)`：对线性输出应用 ReLU 激活函数，进行非线性变换（只保留正向信号，负向信号置 0）。
+   - 核心作用：**引入非线性**。如果没有激活函数，多层全连接层等价于一层线性层，无法学习复杂的非线性关系（比如 “小车速度快且杆子角度大时，右移的 Q 值更高” 这种复杂规律）。
+   - 大白话：128 个 “数据处理员工” 的输出，经过 “ReLU 筛选器”，只保留有用的正向信号，过滤掉没用的负向信号。
+
+   
+
+3. ```
+   return self.fc2(x)
+   ```
+
+   ：
+
+   - 将 ReLU 处理后的隐藏层输出（形状`[32, 128]`）传入第二层全连接层，进行线性变换，得到输出结果（形状`[32, 2]`）。
+   - 输出层不使用激活函数：因为 Q 值可以是任意实数（正数、负数），而 ReLU 会过滤负数值，sigmoid 会把值限制在 0~1 之间，都不适合 Q 值的输出，所以直接返回线性层结果。
+   - 输出结果含义：每个样本对应`action_dim`个 Q 值，比如`[32, 2]`的输出中，每个样本的 2 个值分别对应 “左移” 和 “右移” 的 Q 值。
+
+有了这些基本组件之后，接来下开始实现 DQN 算法:
+
+```python
+class DQN:
+''' DQN算法 '''
+    def __init__(self, state_dim, hidden_dim, action_dim, learning_rate, gamma,
+                 epsilon, target_update, device):
+        self.action_dim = action_dim
+        self.q_net = Qnet(state_dim, hidden_dim,
+                          self.action_dim).to(device)  # Q网络
+
+        # 目标网络
+​        self.target_q_net = Qnet(state_dim, hidden_dim,
+​                                 self.action_dim).to(device)
+        # 使用Adam优化器
+​        self.optimizer = torch.optim.Adam(self.q_net.parameters(),
+​                                          lr=learning_rate)
+​        self.gamma = gamma  # 折扣因子
+​        self.epsilon = epsilon  # epsilon-贪婪策略
+​        self.target_update = target_update  # 目标网络更新频率
+​        self.count = 0  # 计数器,记录更新次数
+​        self.device = device
+def take_action(self, state):  # epsilon-贪婪策略采取动作
+    if np.random.random() < self.epsilon:
+        action = np.random.randint(self.action_dim)
+    else:
+        state = torch.tensor([state], dtype=torch.float).to(self.device)
+        action = self.q_net(state).argmax().item()
+    return action
+
+def update(self, transition_dict):
+    states = torch.tensor(transition_dict['states'],
+                          dtype=torch.float).to(self.device)
+    actions = torch.tensor(transition_dict['actions']).view(-1, 1).to(
+        self.device)
+    rewards = torch.tensor(transition_dict['rewards'],
+                           dtype=torch.float).view(-1, 1).to(self.device)
+    next_states = torch.tensor(transition_dict['next_states'],
+                               dtype=torch.float).to(self.device)
+    dones = torch.tensor(transition_dict['dones'],
+                         dtype=torch.float).view(-1, 1).to(self.device)
+
+    q_values = self.q_net(states).gather(1, actions)  # Q值
+    # 下个状态的最大Q值
+    max_next_q_values = self.target_q_net(next_states).max(1)[0].view(
+        -1, 1)
+    q_targets = rewards + self.gamma * max_next_q_values * (1 - dones
+                                                            )  # TD误差目标
+    dqn_loss = torch.mean(F.mse_loss(q_values, q_targets))  # 均方误差损失函数
+    self.optimizer.zero_grad()  # PyTorch中默认梯度会累积,这里需要显式将梯度置为0
+    dqn_loss.backward()  # 反向传播更新参数
+    self.optimizer.step()
+
+    if self.count % self.target_update == 0:
+        self.target_q_net.load_state_dict(
+            self.q_net.state_dict())  # 更新目标网络
+    self.count += 1
+```
+
+1. 类的初始化方法：`__init__`（初始化双网络、优化器和超参数）
+
+关键解释：
+
+1. 双网络初始化：`q_net`和`target_q_net`都是`Qnet`的实例，结构完全一致，初始参数也相同（因为`Qnet`的权重是随机初始化的，两个网络初始化后参数一致）。
+2. `to(device)`：将网络移到指定设备（比如`cuda:0`表示 GPU，`cpu`表示 CPU），后续所有数据也要移到该设备，否则会报错（数据和网络必须在同一设备上计算）。
+3. Adam 优化器：深度学习中常用的优化器，比传统梯度下降更高效，这里**只传入`self.q_net.parameters()`**，表示只更新当前 Q 网络的参数，目标网络的参数不参与梯度更新。
+4. `target_update`：目标网络的更新频率（比如传入 100，表示每更新 100 次当前网络，就把目标网络的参数替换成当前网络的参数）。
+5. `self.count`：计数器，记录`update`方法被调用的次数，用于触发目标网络的更新。
+
+2. 选动作方法：`take_action`（ε- 贪心策略，基于当前 Q 网络）
+
+```python
+ def take_action(self, state):  # epsilon-贪婪策略采取动作
+        if np.random.random() < self.epsilon:
+            action = np.random.randint(self.action_dim)
+        else:
+            state = torch.tensor([state], dtype=torch.float).to(self.device)
+            action = self.q_net(state).argmax().item()
+        return action
+```
+
+关键解释（和传统 Q-learning 的 ε- 贪心对比，核心逻辑一致，实现细节不同）：
+
+1. 探索环节：和之前一致，用`np.random.randint`随机选择一个动作，不依赖网络。
+
+2. 利用环节：这是 DQN 和传统 Q-learning 的核心区别（用网络替代 Q 表格）：
+
+   - ```
+     torch.tensor([state], dtype=torch.float).to(self.device)
+     ```
+
+     ：将输入的
+
+     ```
+     state
+     ```
+
+     （通常是列表 / 数组）转换成 PyTorch 张量：
+
+     - 加`[]`：将一维状态（比如 CartPole 的 4 维数组）转换成二维张量（形状`[1, 4]`），因为`Qnet`的输入要求有「批量维度」（即使只有一个样本，也要保留批量维度）。
+     - `dtype=torch.float`：设置张量数据类型为浮点型，符合网络输入要求。
+     - `to(self.device)`：将张量移到和网络相同的设备上，避免设备不匹配报错。
+
+   - `self.q_net(state)`：传入当前 Q 网络，得到该状态下所有动作的 Q 值（形状`[1, action_dim]`，比如`[1, 2]`）。
+
+   - `argmax()`：取 Q 值最大的动作索引（对应最优动作）。
+
+   - `item()`：将张量类型的结果转换成普通 Python 整数，方便返回和后续环境交互。
+
+3. 大白话：大部分时候，学员（当前 Q 网络）根据自己的经验选最优动作；偶尔，随机瞎选，探索新的可能性。
+
+3. 核心更新方法：`update`（双网络更新、损失计算、反向传播，核心中的核心）
+
+```python
+def update(self, transition_dict):
+        states = torch.tensor(transition_dict['states'],
+                              dtype=torch.float).to(self.device)
+        actions = torch.tensor(transition_dict['actions']).view(-1, 1).to(
+            self.device)
+        rewards = torch.tensor(transition_dict['rewards'],
+                               dtype=torch.float).view(-1, 1).to(self.device)
+        next_states = torch.tensor(transition_dict['next_states'],
+                                   dtype=torch.float).to(self.device)
+        dones = torch.tensor(transition_dict['dones'],
+                             dtype=torch.float).view(-1, 1).to(self.device)
+```
+
+关键解释：
+
+- `transition_dict`：从经验回放池`sample`后整理的经验字典，包含`states`（批量状态）、`actions`（批量动作）等 5 组数据，每组数据的长度都是`batch_size`（比如 32）。
+
+- 张量转换：将所有数据转换成张量，移到指定设备，保证和网络计算兼容。
+
+- ```
+  view(-1, 1)
+  ```
+
+  ：调整张量形状为「列向量」（形状
+
+  ```
+  [batch_size, 1]
+  ```
+
+  ，比如
+
+  ```
+  [32, 1]
+  ```
+
+  ）：
+
+  - 作用：保证后续计算时，维度匹配（比如`actions`和`q_values`的维度一致，才能进行`gather`操作）。
+  - `-1`：表示自动计算该维度的大小，只需要指定第二个维度为 1，无需手动计算`batch_size`。
+
+- `dones`转换成`torch.float`：因为后续要参与数值计算（`1 - dones`），所以需要浮点型。
+
+
+
+```python
+# 第二步：计算当前Q值（q_values）：当前状态下，实际执行的动作对应的Q值
+q_values = self.q_net(states).gather(1, actions)  # Q值
+```
+
+关键解释（新手重点理解`gather`函数）：
+
+- `self.q_net(states)`：传入当前 Q 网络，得到批量状态下所有动作的 Q 值（形状`[batch_size, action_dim]`，比如`[32, 2]`）。
+
+- ```
+  gather(1, actions)
+  ```
+
+  ：核心函数，作用是「从所有动作的 Q 值中，提取出
+
+  实际执行的动作
+
+  对应的 Q 值」：
+
+  - 第一个参数`1`：表示按「列」维度进行提取（即按动作维度提取）。
+  - 第二个参数`actions`：表示要提取的动作索引（形状`[32, 1]`）。
+
+  
+
+- 结果：`q_values`的形状是`[32, 1]`，每个元素对应一个样本「当前状态 - 实际动作」对的 Q 值（这是我们要优化的对象）。
+
+- 大白话：从学员（当前 Q 网络）的评分中，只提取出 “当时实际做的动作” 的评分，而不是所有动作的评分。
+
+```python
+# 第三步：计算下个状态的最大Q值（max_next_q_values）：基于目标网络计算（稳定的标准答案）
+max_next_q_values = self.target_q_net(next_states).max(1)[0].view(-1, 1)
+```
+
+关键解释：
+
+- `self.target_q_net(next_states)`：传入**目标 Q 网络**，得到批量下一状态下所有动作的 Q 值（形状`[32, 2]`）—— 这里不用当前 Q 网络，是为了保证目标 Q 值的稳定性（教练的标准不变）。
+- `max(1)`：按「列」维度取最大值（即每个状态下所有动作的最大 Q 值），返回一个元组`(最大值, 最大值索引)`。
+- `[0]`：取元组中的第一个元素（即最大 Q 值本身，忽略索引），形状为`[32]`。
+- `view(-1, 1)`：调整形状为`[32, 1]`，和`q_values`维度匹配，方便后续计算。
+- 大白话：教练（目标网络）对 “下一个路况” 进行评分，给出最优动作的最高评分。
+
+```python
+# 第四步：计算目标Q值（q_targets）：TD误差的目标值（标准答案）    
+q_targets = rewards + self.gamma * max_next_q_values * (1 - dones)
+```
+
+关键解释（核心公式，对应 DQN 的目标 Q 值计算）：
+
+- 公式拆解：`目标Q值 = 即时奖励 + 折扣因子 × 下一状态最大Q值 × （1 - 是否结束）`
+
+- ```
+  (1 - dones)
+  ```
+
+  ：核心修正项，作用是「如果回合结束（
+
+  ```
+  done=True
+  ```
+
+  ，即
+
+  ```
+  dones=1
+  ```
+
+  ），则未来奖励不计入」：
+
+  - 当`done=True`（比如 CartPole 杆子倒了）：`1 - dones=0`，后面的未来奖励项被置 0，目标 Q 值就等于即时奖励，避免计算无效的未来奖励。
+  - 当`done=False`（回合继续）：`1 - dones=1`，正常计算未来奖励的折现值。
+
+- 大白话：标准答案 = 当时的教练反馈（即时奖励） + 教练预估的未来最优奖励（折扣后），如果游戏结束，就只算当时的反馈。
+
+
+
+```python
+# 第五步：计算损失函数（均方误差MSE）    
+dqn_loss = torch.mean(F.mse_loss(q_values, q_targets))
+```
+
+关键解释：
+
+- `F.mse_loss(q_values, q_targets)`：计算`q_values`（当前 Q 值）和`q_targets`（目标 Q 值）之间的**均方误差**（每个样本的误差平方），形状为`[32, 1]`。
+- `torch.mean()`：对所有样本的均方误差取平均值，得到整个批量的平均损失（标量）。
+- 损失的含义：当前 Q 网络的预测值（`q_values`）和标准答案（`q_targets`）之间的差距，差距越小，说明网络学得越好。
+
+
+
+```python
+# 第六步：反向传播，更新当前Q网络的参数
+self.optimizer.zero_grad()  # PyTorch中默认梯度会累积,这里需要显式将梯度置为0
+        dqn_loss.backward()  # 反向传播更新参数
+        self.optimizer.step()
+```
+
+关键解释（PyTorch 训练的固定流程）：
+
+- `self.optimizer.zero_grad()`：清空上一次训练的梯度，避免梯度累积导致更新错误（比如上一次的梯度会影响本次的更新）。
+- `dqn_loss.backward()`：反向传播算法，从损失值出发，计算当前 Q 网络所有可训练参数（`fc1`、`fc2`的权重和偏置）的梯度。
+- `self.optimizer.step()`：Adam 优化器根据计算出的梯度，更新当前 Q 网络的参数（即 “学员根据差距修正自己的经验”）。
+- 注意：目标 Q 网络的参数不会被更新，它的参数只有在后续同步时才会变化。
+
+
+
+```python
+ # 第七步：定期更新目标网络（同步当前Q网络的参数）
+if self.count % self.target_update == 0:
+            self.target_q_net.load_state_dict(
+                self.q_net.state_dict())  # 更新目标网络
+        self.count += 1
+```
+
+关键解释：
+
+- `self.count % self.target_update == 0`：判断计数器是否是目标网络更新频率的倍数（比如每 100 次更新当前网络，同步一次目标网络）。
+
+- ```
+  self.target_q_net.load_state_dict(self.q_net.state_dict())
+  ```
+
+  ：核心同步操作：
+
+  - `self.q_net.state_dict()`：获取当前 Q 网络的所有参数（权重、偏置），以字典形式存储。
+  - `load_state_dict()`：将当前 Q 网络的参数加载到目标 Q 网络中，实现两个网络的参数同步（即 “教练更新自己的教学标准，和学员的最新水平保持一致”）。
+
+- `self.count += 1`：计数器加 1，记录本次更新。
+
+- 大白话：每过一段时间，教练就把学员的最新经验复制过来，更新自己的教学标准，保证标准答案的时效性。
+
+
+
+一切准备就绪，开始训练并查看结果。我们之后会将这一训练过程包装进`rl_utils`库中，方便之后要学习的算法的代码实现。
+
+```python
+lr = 2e-3
+num_episodes = 500
+hidden_dim = 128
+gamma = 0.98
+epsilon = 0.01
+target_update = 10
+buffer_size = 10000
+minimal_size = 500
+batch_size = 64
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device(
+    "cpu")
+
+env_name = 'CartPole-v0'
+env = gym.make(env_name)
+random.seed(0)
+np.random.seed(0)
+env.seed(0)
+torch.manual_seed(0)
+replay_buffer = ReplayBuffer(buffer_size)
+state_dim = env.observation_space.shape[0]
+action_dim = env.action_space.n
+agent = DQN(state_dim, hidden_dim, action_dim, lr, gamma, epsilon,
+            target_update, device)
+
+return_list = []
+for i in range(10):
+    with tqdm(total=int(num_episodes / 10), desc='Iteration %d' % i) as pbar:
+        for i_episode in range(int(num_episodes / 10)):
+            episode_return = 0
+            state = env.reset()
+            done = False
+            while not done:
+                action = agent.take_action(state)
+                next_state, reward, done, _ = env.step(action)
+                replay_buffer.add(state, action, reward, next_state, done)
+                state = next_state
+                episode_return += reward
+
+                # 当buffer数据的数量超过一定值后,才进行Q网络训练
+
+​                if replay_buffer.size() > minimal_size:
+​                    b_s, b_a, b_r, b_ns, b_d = replay_buffer.sample(batch_size)
+​                    transition_dict = {
+​                        'states': b_s,
+​                        'actions': b_a,
+​                        'next_states': b_ns,
+​                        'rewards': b_r,
+​                        'dones': b_d
+​                    }
+​                    agent.update(transition_dict)
+​            return_list.append(episode_return)
+​            if (i_episode + 1) % 10 == 0:
+​                pbar.set_postfix({
+​                    'episode':
+​                    '%d' % (num_episodes / 10 * i + i_episode + 1),
+​                    'return':
+​                    '%.3f' % np.mean(return_list[-10:])
+​                })
+​            pbar.update(1)
+```
+
+**`gym`**：OpenAI 推出的强化学习环境库，`CartPole-v0`是其中的经典简单环境，我们用它来练手。
+
+**`tqdm`**：Python 的进度条工具，用于可视化训练进度，方便观察训练是否在正常进行。
+
+**CartPole 的奖励机制**：每一步杆子保持不倒，就会获得`+1`的奖励，局的总奖励（`episode_return`）就是智能体存活的步数，总奖励越高，说明智能体表现越好（理想状态下最高可以达到 200）。
+
+```py
+import gym import random import numpy as np import torch from tqdm import tqdm # 假设之前的ReplayBuffer、Qnet、DQN类已经提前定义
+```
+
+第一部分：超参数设置（训练的 “配置项”，每个都有明确作用）
+
+```python
+lr = 2e-3
+num_episodes = 500
+hidden_dim = 128
+gamma = 0.98
+epsilon = 0.01
+target_update = 10
+buffer_size = 10000
+minimal_size = 500
+batch_size = 64
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device(
+    "cpu")
+```
+
+关键解释：
+
+- 超参数的取值：这些是针对 CartPole 环境的经典合理取值，新手不用修改，先跑通再调参。
+- `2e-3`：科学计数法，等价于`0.002`，深度学习中学习率通常取这个量级（太大容易训练震荡，太小收敛太慢）。
+- `minimal_size = 500`：核心作用是 “先收集足够经验，再开始训练”，避免一开始经验太少，采样的样本没有代表性，导致训练不稳定。
+- 设备自动选择：`torch.cuda.is_available()`判断是否有可用 GPU，GPU 能大幅提升训练速度，没有则自动切换到 CPU，保证代码的可移植性。
+
+2. 第二部分：环境与各类组件初始化（训练前的 “准备工作”）
+
+```python
+env_name = 'CartPole-v0'
+env = gym.make(env_name)
+random.seed(0)
+np.random.seed(0)
+env.seed(0)
+torch.manual_seed(0)
+replay_buffer = ReplayBuffer(buffer_size)# 初始化经验回放池（容量10000）
+state_dim = env.observation_space.shape[0]
+action_dim = env.action_space.n
+agent = DQN(state_dim, hidden_dim, action_dim, lr, gamma, epsilon,
+            target_update, device)
+```
+
+关键解释：
+
+- `gym.make(env_name)`：创建指定名称的环境实例，后续通过`env`和游戏环境交互。
+- 设置随机种子：`random`、`np`、`env`、`torch`的种子都设为 0，目的是**让所有随机操作的结果固定**（比如 ε- 贪心的随机探索、网络初始化的权重、环境的随机初始状态），这样每次运行代码，训练结果都一致，方便调试和对比（如果不设种子，每次运行结果都不一样，难以判断调参是否有效）。
+- 从环境获取维度：
+  - `env.observation_space.shape[0]`：获取环境状态空间的维度（CartPole 的状态是 4 维数组，所以`shape[0]=4`）。
+  - `env.action_space.n`：获取环境的可选动作数（CartPole 只有 2 个动作，所以`n=2`）。
+  - 优势：这是通用方法，换其他环境（比如`MountainCar-v0`）时，无需手动修改`state_dim`和`action_dim`，代码兼容性更强。
+- `agent = DQN(...)`：初始化我们之前定义的 DQN 智能体，传入所有必要参数，智能体准备就绪。
+
+3. 第三部分：核心训练循环（最关键，智能体的 “学习过程”）
+
+```python
+return_list = []
+for i in range(10):
+    with tqdm(total=int(num_episodes / 10), desc='Iteration %d' % i) as pbar:
+        for i_episode in range(int(num_episodes / 10)):
+            episode_return = 0
+            state = env.reset()
+            done = False
+            while not done:
+                action = agent.take_action(state)
+                next_state, reward, done, _ = env.step(action)
+                replay_buffer.add(state, action, reward, next_state, done)
+                state = next_state
+                episode_return += reward
+                # 当buffer数据的数量超过一定值后,才进行Q网络训练
+                if replay_buffer.size() > minimal_size:
+                    b_s, b_a, b_r, b_ns, b_d = replay_buffer.sample(batch_size)
+                    transition_dict = {
+                        'states': b_s,
+                        'actions': b_a,
+                        'next_states': b_ns,
+                        'rewards': b_r,
+                        'dones': b_d
+                    }
+                    agent.update(transition_dict)
+            return_list.append(episode_return)
+            if (i_episode + 1) % 10 == 0:
+                pbar.set_postfix({
+                    'episode':
+                    '%d' % (num_episodes / 10 * i + i_episode + 1),
+                    'return':
+                    '%.3f' % np.mean(return_list[-10:])
+                })
+            pbar.update(1)
+```
+
+关键解释（分层细化）：
+
+##### （1） 外层迭代循环（`for i in range(10)`）
+
+- 目的：将 500 局游戏分成 10 个批次，每个批次 50 局，方便用`tqdm`显示进度条（如果直接 500 局，进度条太长，不易观察）。
+- `with tqdm(...) as pbar`：创建上下文管理器，自动管理进度条，循环结束后进度条自动关闭，无需手动清理。
+
+##### （2） 内层局循环（`for i_episode in range(50)`）
+
+- 每个迭代处理 50 局游戏，每一局都是一次独立的 “小车顶杆子” 尝试。
+- `episode_return = 0`：每一局开始前，重置总奖励计数器（记录该局存活的步数）。
+- `state = env.reset()`：重置环境到初始状态（比如小车在中间，杆子竖直），返回初始状态数据。
+- `done = False`：重置局结束标记，开始新一局的互动。
+
+##### （3） 局内互动循环（`while not done`）—— 每一步的核心操作
+
+这是智能体和环境互动、收集经验、学习的核心，逐句解释：
+
+1. `action = agent.take_action(state)`：调用之前`DQN`类的`take_action`方法，用 ε- 贪心策略选择动作（99% 选最优，1% 随机探索）。
+
+2. ```
+   next_state, reward, done, _ = env.step(action)
+   ```
+
+   ：执行选中的动作，获取环境的 4 个反馈：
+
+   - `next_state`：执行动作后的新状态（小车移动后的位置、杆子的新角度）。
+   - `reward`：执行动作后的即时奖励（杆子没倒，奖励`+1`）。
+   - `done`：是否结束该局（`True`表示杆子倒了 / 小车出界，`False`表示继续）。
+   - `_`：额外信息（CartPole 中无有效信息，用下划线忽略）。
+
+3. `replay_buffer.add(...)`：将本次互动的 “五元组经验” 存入经验回放池（积累经验，后续用于训练）。
+
+4. `state = next_state`：更新当前状态为新状态，为下一步动作做准备（相当于 “小车移动到新位置，准备下一步操作”）。
+
+5. `episode_return += reward`：累加奖励（该局存活步数 + 1）。
+
+6. ```
+   if replay_buffer.size() > minimal_size
+   ```
+
+   ：判断经验池是否积累了足够的经验（>500 条），只有满足条件才开始训练：
+
+   - 原因：经验不足时，采样的样本没有代表性，训练效果差，甚至会导致网络震荡，所以先 “攒经验”，再 “学经验”。
+   - 采样经验→构建字典→调用`agent.update`：这三步衔接之前的`ReplayBuffer`和`DQN`类，完成一次 Q 网络的训练（计算损失、反向传播、更新参数、定期同步目标网络）。
+   - 注意：**每一步都可能触发一次网络训练**（只要经验足够），而不是每一局只训练一次，这样能让智能体更快学习。
+
+##### （4） 局结束后的操作
+
+1. `return_list.append(episode_return)`：将该局的总奖励存入列表，后续用于分析训练效果（比如绘制奖励曲线，看是否逐渐上升）。
+
+2. ```
+   pbar.set_postfix(...)
+   ```
+
+   ：每 10 局更新一次进度条的附加信息，显示两个关键内容：
+
+   - `episode`：当前完成的总局数（方便知道训练进度）。
+   - `return`：最近 10 局的平均奖励（比单局奖励更能反映智能体的稳定表现，平均奖励越高，说明智能体越稳定，学得越好）。
+
+3. `pbar.update(1)`：进度条前进 1 步，表示完成了 1 局游戏。
+
+![image-20260203224629569](RL基本原理-img/image-20260203224629569.png)
+
+
+
+```python
+episodes_list = list(range(len(return_list)))
+plt.plot(episodes_list, return_list)
+plt.xlabel('Episodes')
+plt.ylabel('Returns')
+plt.title('DQN on {}'.format(env_name))
+plt.show()
+
+mv_return = rl_utils.moving_average(return_list, 9)
+plt.plot(episodes_list, mv_return)
+plt.xlabel('Episodes')
+plt.ylabel('Returns')
+plt.title('DQN on {}'.format(env_name))
+plt.show()
+```
+
+`return_list`：记录了每一局游戏的总奖励（比如 500 局，就有 500 个数值），是绘图的「y 轴数据」。
+
+`env_name`：环境名称（CartPole-v0），用于设置图表标题。
+
+第一部分：绘制「原始奖励折线图」
+
+```python
+episodes_list = list(range(len(return_list)))
+plt.plot(episodes_list, return_list)
+plt.xlabel('Episodes')
+plt.ylabel('Returns')
+plt.title('DQN on {}'.format(env_name))
+plt.show()
+```
+
+#### 逐句关键解释：
+
+1. `episodes_list = list(range(len(return_list)))`
+
+- `len(return_list)`：获取总训练局数（比如 500 局，返回 500）。
+- `range(len(return_list))`：生成一个从 0 到 499 的整数序列（对应第 0 局到第 499 局）。
+- `list(...)`：把序列转换成列表，作为图表的「x 轴数据」（每一个 x 值对应一局游戏）。
+- 大白话：给每一局的奖励 “编个号”，方便在图表上按顺序排列。
+
+1. `plt.plot(episodes_list, return_list)`
+
+- `plt.plot(x轴数据, y轴数据)`：matplotlib 的核心绘图函数，用于绘制「折线图」。
+- 这里 x 轴是 “局数”，y 轴是 “该局的总奖励”，绘制后会得到一条「原始奖励曲线」。
+- 原始曲线的特点：**波动很大**（因为智能体有 ε- 贪心探索，偶尔会随机选动作导致局提前结束，奖励骤降；也可能偶尔超水平发挥，奖励骤升）。
+
+1. `plt.xlabel()` / `plt.ylabel()` / `plt.title()`
+
+- 这三个函数是给图表加 “注释”，让别人能看懂图表的含义，也让图表更美观规范。
+- `format(env_name)`：把环境名（CartPole-v0）填入标题中，实现标题的动态生成（换其他环境时，标题会自动更新）。
+
+1. `plt.show()`
+
+- 核心作用：**显示绘制好的图表**（如果没有这句话，matplotlib 只会在内存中生成图表，不会在屏幕上显示）。
+- 执行这句话后，你会看到一个弹出的窗口，里面是原始奖励折线图。
+
+第二部分：绘制「滑动平均奖励折线图」（核心！更易判断训练效果）
+
+这是可视化的关键，因为原始曲线波动太大，很难看出整体学习趋势，而「滑动平均」能平滑波动，清晰展现智能体的进步轨迹。
+
+```python
+mv_return = rl_utils.moving_average(return_list, 9)
+plt.plot(episodes_list, mv_return)
+plt.xlabel('Episodes')
+plt.ylabel('Returns')
+plt.title('DQN on {}'.format(env_name))
+plt.show()
+```
+
+#### 逐句关键解释：
+
+1. `mv_return = rl_utils.moving_average(return_list, 9)`
+
+- 先搞懂：什么是「滑动平均」？
+
+  用大白话讲：**取 “最近 N 局” 的奖励平均值，作为当前局的 “平滑奖励”，然后像 “滑动窗口” 一样，逐局往后计算**。
+
+  这里`9`就是「窗口大小」，表示每次取最近 9 局的奖励计算平均值。
+
+  举例：第 10 局的平滑奖励 = 第 2 局到第 10 局的奖励平均值；第 11 局的平滑奖励 = 第 3 局到第 11 局的奖励平均值，以此类推。
+
+- 再搞懂：`rl_utils.moving_average()`
+
+  - `rl_utils`：是一个常用的**强化学习工具库**（里面封装了滑动平均、结果保存等实用函数，很多教程都会用到）。
+
+  - `moving_average(原始数据, 窗口大小)`：核心功能是对原始数据进行平滑处理，过滤波动噪声，让曲线更平缓。
+
+  - 为什么窗口大小是9？
+
+    选择奇数窗口（5、9、11）更平稳，9是合理取值：太小（比如 3）平滑效果差，太大（比如 21）会让曲线滞后，无法及时反映学习趋势。
+
+![image-20260203225318184](RL基本原理-img/image-20260203225318184.png)
+
+可以看到，DQN 的性能在 100 个序列后很快得到提升，最终收敛到策略的最优回报值 200。我们也可以看到，在 DQN 的性能得到提升后，它会持续出现一定程度的震荡，这主要是神经网络过拟合到一些局部经验数据后由运算带来的影响。
+
+
+
+#### 以图像为输入的 DQN 算法
+
+在本书前面章节所述的强化学习环境中，我们都使用非图像的状态作为输入（例如车杆环境中车的坐标、速度），但是在一些视频游戏中，智能体并不能直接获取这些状态信息，而只能直接获取屏幕中的图像。要让智能体和人一样玩游戏，我们需要让智能体学会以图像作为状态时的决策。
+
+我们可以利用 7.4 节的 DQN 算法，将卷积层加入其网络结构以提取图像特征，最终实现以图像为输入的强化学习。以图像为输入的 DQN 算法的代码与 7.4 节的代码的不同之处主要在于 Q 网络的结构和数据输入。
+
+DQN 网络通常会将最近的几帧图像一起作为输入，从而感知环境的动态性。接下来我们实现以图像为输入的 DQN 算法，但由于代码需要运行较长的时间，我们在此便不展示训练结果。
+
+
+
+```python
+class ConvolutionalQnet(torch.nn.Module):
+    ''' 加入卷积层的Q网络 '''
+    def __init__(self, action_dim, in_channels=4):
+        super(ConvolutionalQnet, self).__init__()
+        self.conv1 = torch.nn.Conv2d(in_channels, 32, kernel_size=8, stride=4)
+        self.conv2 = torch.nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv3 = torch.nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        self.fc4 = torch.nn.Linear(7 * 7 * 64, 512)
+        self.head = torch.nn.Linear(512, action_dim)		
+    def forward(self, x):
+        x = x / 255
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.fc4(x))
+        return self.head(x)
+```
+
+
+
+1. 类定义与初始化方法：`__init__`（构建卷积 + 全连接的网络结构）
+
+```python
+class ConvolutionalQnet(torch.nn.Module):
+    ''' 加入卷积层的Q网络 '''
+    def __init__(self, action_dim, in_channels=4):
+        super(ConvolutionalQnet, self).__init__()
+        self.conv1 = torch.nn.Conv2d(in_channels, 32, kernel_size=8, stride=4)
+        self.conv2 = torch.nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv3 = torch.nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        self.fc4 = torch.nn.Linear(7 * 7 * 64, 512)
+        self.head = torch.nn.Linear(512, action_dim)
+```
+
+关键解释：
+
+##### （1）初始化参数说明
+
+- `action_dim`：动作维度（可选动作数，如 Atari 游戏的 “上、下、左、右”），和之前的 Qnet 一致。
+- `in_channels=4`：输入图像的通道数，默认 4（对应强化学习中常用的 “堆叠 4 帧画面”，捕捉运动信息，比如球的移动方向），可根据场景调整（如灰度图设为 1）。
+
+##### （2）卷积层（`torch.nn.Conv2d`）核心参数解读（新手重点）
+
+每个卷积层的参数格式：`Conv2d(输入通道数, 输出通道数, 卷积核大小, 步长)`
+
+- 「输入通道数」：上一层的输出通道数（第一层对应`in_channels`，后续对应前一层的输出通道数）。
+- 「输出通道数」：卷积核的数量（如 32 表示用 32 个不同的卷积核，提取 32 种不同特征），数量越多，提取的特征越丰富。
+- 「kernel_size（卷积核大小）」：卷积核的边长（如 8 表示 8×8 的正方形卷积核），用于遍历图像提取局部特征。
+- 「stride（步长）」：卷积核每次滑动的像素数（如 4 表示每次移动 4 个像素），步长越大，输出图像尺寸越小，计算效率越高。
+
+##### （3）三层卷积层的作用（由浅入深提取特征）
+
+- 第 1 层（`conv1`）：8×8 卷积核、步长 4，把输入图像缩小，提取**初级特征**（如画面的边缘、明暗纹理）。
+- 第 2 层（`conv2`）：4×4 卷积核、步长 2，进一步缩小图像，提取**中级特征**（如游戏中的球拍、砖块轮廓）。
+- 第 3 层（`conv3`）：3×3 卷积核、步长 1，微调特征，提取**高级特征**（如 “球拍在画面左侧”“球正在下落” 这类语义信息）。
+
+##### （4）全连接层的输入维度（`7*7*64`）解读
+
+- 经过三层卷积后，原本的 Atari 游戏画面（210×160）会被缩小为`7×7`的特征图（这是行业内的经典配置，无需手动计算，记住结果即可）。
+- 第三层卷积的输出是「64 个 7×7 的特征图」，展平成一维向量后，维度就是`7*7*64=3136`，这就是`fc4`的输入维度。
+- `self.fc4`：把 3136 维的特征向量整合为 512 维，`self.head`再把 512 维特征转换成`action_dim`维的 Q 值，和之前的 Qnet 输出逻辑一致。
+
+
+
+2. 前向传播方法：`forward`（定义图像从输入到输出 Q 值的计算流程）
+
+```python
+def forward(self, x):
+        x = x / 255
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.fc4(x))
+        return self.head(x)
+```
+
+关键解释（逐句拆解）：
+
+1. `x = x / 255`：**像素归一化**，这是处理图像的必备步骤：
+
+- 图像像素值的范围是 0~255，数值差距较大，直接输入网络会导致梯度波动，训练不稳定。
+- 除以 255 后，像素值被压缩到 0~1 区间，数据分布更均匀，能大幅加快网络收敛速度。
+
+1. 卷积层 + ReLU 激活：`F.relu(self.convX(x))`
+
+- 和之前全连接层的 ReLU 作用一致，**引入非线性**，让网络能学习复杂的视觉特征关联（比如 “球在球拍上方时，向上移动的 Q 值更高”）。
+- 每一层卷积后都必须加激活函数，否则多层卷积等价于一层线性变换，无法提取复杂特征。
+
+1. `x = F.relu(self.fc4(x))`：
+
+- 卷积层输出的是「4 维张量」（形状：`[批量大小, 64, 7, 7]`），传入全连接层时，PyTorch 会**自动将其展平为一维向量**（形状：`[批量大小, 3136]`），无需手动调用`view()`。
+- 经过`fc4`整合后，特征向量变为 512 维，再用 ReLU 激活过滤无效特征。
+
+1. `return self.head(x)`：输出层直接返回 Q 值，不使用激活函数（Q 值可以是任意实数，无需限制范围），和之前的 Qnet 一致。
+
+
+
+#### 小结
+
+本章讲解了 DQN 算法，其主要思想是用一个神经网络来表示最优策略的函数，然后利用 Q-learning 的思想进行参数更新。
+
+为了保证训练的稳定性和高效性，DQN 算法引入了经验回放和目标网络两大模块，使得算法在实际应用时能够取得更好的效果。
+
+在 2013 年的 NIPS 深度学习研讨会上，DeepMind 公司的研究团队发表了 DQN 论文，首次展示了这一直接通过卷积神经网络接受像素输入来玩转各种雅达利（Atari）游戏的强化学习算法，由此拉开了深度强化学习的序幕。DQN 是深度强化学习的基础，掌握了该算法才算是真正进入了深度强化学习领域，本书中还有更多的深度强化学习算法等待读者探索。
 
 
 
